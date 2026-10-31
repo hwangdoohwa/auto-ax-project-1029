@@ -4,6 +4,13 @@
 
 **소개 홈페이지:** https://hwangdoohwa.github.io/auto-ax-project-1029/ — 자료 구성·복습 순서·확인 숫자와 웹툰 숏폼 영상 2편을 스마트폰에서도 볼 수 있습니다.
 
+## Day5 실습 작업물
+
+- [설비센서 이상 후보 탐지기 (웹앱)](https://hwangdoohwa.github.io/auto-ax-project-1029/sensor-app/) — 센서 CSV 업로드 → 평균·표준편차·평상 범위·이상 후보 계산 → PPTX 덱 내려받기
+- [인포그래픽 · 예지보전 도입사례 5건](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/case5.png) · [인포그래픽 · 설비센서 50건 튄 값 vs 추세](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/sensor_story.png)
+- [분석 차트 · 평상 범위와 이상 후보](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/sensor_timeseries.png) · [z-점수 히트맵](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/sensor_zscore.png)
+- 만든 코드: [작업물 폴더](작업물/)
+
 ## 수정본 다운로드 (_01)
 
 - [수정본 PDF · 95페이지](자동차AX_1~4일차_복습실습강의안_20261029_01.pdf)

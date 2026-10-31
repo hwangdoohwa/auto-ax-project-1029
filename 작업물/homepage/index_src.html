@@ -1,0 +1,295 @@
+<title>자동차 AX 자료 정리</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="자동차특화 AX융합전문가 1~4일차 복습 강의안·핵심 프롬프트 70개·브라우저 실습실과 웹툰 숏폼 영상">
+<meta property="og:title" content="자동차 AX 복습 자료실">
+<meta property="og:description" content="기준 31장을 95장으로 펼친 1~4일차 복습 강의안, 프롬프트 70개, 실습실과 웹툰 숏폼 영상">
+<meta property="og:image" content="ep02_poster.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 웹툰 컷처럼 굵은 테두리 패널을 한 단으로 쌓고, 상단 고정 바로 구역 사이를 오간다. 넓은 화면에서 히어로만 글·영상 두 단 */
+:root {
+  --bg: #EDF1F7;
+  --dots: rgba(27, 42, 74, .07);
+  --panel: #FFFFFF;
+  --ink: #1B2A4A;
+  --muted: #56637F;
+  --line: #1B2A4A;
+  --accent: #E8502A;
+  --pop: #F6B22B;
+  --ok: #1E7F4F;
+  --warn: #C8213A;
+  --soft: #E2E9F4;
+  --bar: rgba(237, 241, 247, .88);
+  --display: "Black Han Sans", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+  --shadow: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1729; --dots: rgba(246, 178, 43, .06); --panel: #18233D; --ink: #EAF0FA; --muted: #A7B3CA; --line: #F6B22B;
+    --accent: #FF7A4D; --pop: #F6B22B; --ok: #4CC38A; --warn: #FF6B7D; --soft: #22304E; --bar: rgba(15, 23, 41, .88);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1729; --dots: rgba(246, 178, 43, .06); --panel: #18233D; --ink: #EAF0FA; --muted: #A7B3CA; --line: #F6B22B;
+  --accent: #FF7A4D; --pop: #F6B22B; --ok: #4CC38A; --warn: #FF6B7D; --soft: #22304E; --bar: rgba(15, 23, 41, .88);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background-color: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.7;
+  background-image: radial-gradient(var(--dots) 1.6px, transparent 1.6px); background-size: 22px 22px;
+  word-break: keep-all; overflow-wrap: anywhere;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bar); }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: clamp(28px, 5vw, 44px); padding-block: clamp(24px, 5vw, 48px) 64px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+h1, h2 { font-family: var(--display); font-weight: 400; letter-spacing: .01em; }
+h1 { font-size: clamp(2.5rem, 8vw, 4.4rem); line-height: 1.08; }
+h2 { font-size: clamp(1.55rem, 4.6vw, 2.15rem); line-height: 1.2; }
+p { margin: 0; }
+a { color: inherit; }
+img, video { max-width: 100%; }
+.eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .14em; color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* 상단 고정 바 */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bar); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 3px solid var(--line); }
+.topbar .in { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 16px; min-height: 58px; }
+.brand { font-family: var(--display); font-size: 1.15rem; text-decoration: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+.brand i { width: 14px; height: 14px; background: var(--pop); border: 3px solid var(--line); display: inline-block; transform: rotate(45deg); }
+.nav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a { text-decoration: none; font-size: .9rem; font-weight: 700; padding: 6px 12px; border-radius: 999px; white-space: nowrap; color: var(--muted); }
+.nav a:hover { background: var(--soft); color: var(--ink); }
+.gh { margin-left: auto; text-decoration: none; font-weight: 700; font-size: .88rem; padding: 7px 14px; border: 3px solid var(--line); background: var(--pop); color: #1B2A4A; white-space: nowrap; }
+
+section[id], header[id] { scroll-margin-top: 84px; }
+.panel { background: var(--panel); border: 4px solid var(--line); box-shadow: var(--shadow) var(--shadow) 0 var(--line); padding: clamp(20px, 4.5vw, 40px); display: grid; gap: 22px; min-width: 0; }
+.head { display: grid; gap: 6px; }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 56px); align-items: center; }
+.hero .copy { display: grid; gap: 22px; min-width: 0; }
+.hl { background: linear-gradient(transparent 60%, var(--pop) 60%); padding: 0 .08em; }
+.lede { font-size: clamp(1rem, 2.6vw, 1.12rem); color: var(--muted); max-width: 33em; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; font-weight: 700; text-decoration: none; border: 3px solid var(--line); background: var(--pop); color: #1B2A4A; box-shadow: 4px 4px 0 var(--line); transition: transform .12s, box-shadow .12s; }
+.btn.ghost { background: var(--panel); color: var(--ink); }
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--line); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--line); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: .84rem; }
+.meta span { padding: 4px 12px; background: var(--panel); border: 2px solid var(--soft); border-radius: 999px; color: var(--muted); font-weight: 500; }
+.player { justify-self: center; width: min(330px, 100%); display: grid; gap: 12px; margin: 0; position: relative; }
+.player .say { position: absolute; top: -14px; left: -18px; z-index: 2; background: var(--panel); border: 3px solid var(--line); border-radius: 18px; padding: 6px 14px; font-weight: 900; font-size: .9rem; transform: rotate(-4deg); }
+.player video { width: 100%; aspect-ratio: 9 / 16; border: 4px solid var(--line); box-shadow: var(--shadow) var(--shadow) 0 var(--line); background: #1B2A4A; display: block; object-fit: cover; }
+.player figcaption { font-size: .84rem; color: var(--muted); text-align: center; }
+
+/* 규모 */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.stat { border: 3px solid var(--line); background: var(--panel); padding: 18px 16px; display: grid; gap: 4px; align-content: start; }
+.stat b { font-family: var(--display); font-weight: 400; font-size: clamp(1.7rem, 4.5vw, 2.3rem); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat b em { font-style: normal; color: var(--accent); }
+.stat span { font-size: .88rem; color: var(--muted); line-height: 1.5; }
+
+/* 파일 */
+.files { list-style: none; margin: 0; padding: 0; display: grid; }
+.files li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 16px 0; border-top: 2px dashed var(--soft); align-items: baseline; }
+.files li:first-child { border-top: 0; padding-top: 0; }
+.files .name { min-width: 0; }
+.files a { font-family: var(--mono); font-size: .92rem; overflow-wrap: anywhere; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.files a:hover { color: var(--accent); }
+.files .size { font-family: var(--mono); font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.files .desc { grid-column: 1 / -1; font-size: .92rem; color: var(--muted); }
+.tag { display: inline-block; font-family: var(--body); font-size: .7rem; font-weight: 700; padding: 1px 8px; margin-left: 6px; border-radius: 4px; background: var(--accent); color: #fff; vertical-align: 2px; }
+
+/* 순서 */
+.steps { counter-reset: s; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; align-items: start; }
+.steps li::before { content: counter(s); font-family: var(--display); font-size: 1.3rem; width: 44px; height: 44px; display: grid; place-items: center; border: 3px solid var(--line); background: var(--pop); color: #1B2A4A; }
+.steps strong { display: block; line-height: 1.5; margin-bottom: 2px; }
+.steps p { color: var(--muted); font-size: .93rem; }
+
+/* 확인 숫자 */
+.checks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.check { border-left: 6px solid var(--ok); background: var(--soft); padding: 16px 18px; display: grid; gap: 6px; align-content: start; }
+.check.assume { border-left-color: var(--warn); }
+.check .lbl { font-size: .78rem; font-weight: 700; letter-spacing: .06em; color: var(--muted); }
+.check b { font-size: clamp(1.25rem, 3.4vw, 1.45rem); font-variant-numeric: tabular-nums; }
+.check small { color: var(--muted); font-size: .86rem; line-height: 1.55; }
+
+/* 영상 */
+.eps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.ep { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px; align-items: start; padding: 16px; border: 3px solid var(--soft); }
+.ep video { width: 100%; aspect-ratio: 9 / 16; border: 3px solid var(--line); background: #1B2A4A; display: block; object-fit: cover; }
+.ep .t { display: grid; gap: 8px; min-width: 0; align-content: start; }
+.ep .no { font-family: var(--mono); font-size: .8rem; color: var(--accent); }
+.ep h3 { font-size: 1.08rem; line-height: 1.4; }
+.ep p { color: var(--muted); font-size: .92rem; }
+
+/* 작업물 */
+.app-card { display: grid; gap: 6px; padding: 18px 20px; border: 3px solid var(--line); background: var(--pop); color: #1B2A4A; text-decoration: none; box-shadow: 4px 4px 0 var(--line); transition: transform .12s, box-shadow .12s; }
+.app-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--line); }
+.app-card strong { font-size: 1.15rem; }
+.app-card span { font-size: .93rem; }
+.app-k { font-family: var(--mono); font-size: .75rem !important; letter-spacing: .1em; }
+.shots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.shots figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+.shots img { width: 100%; height: auto; display: block; border: 3px solid var(--soft); }
+.shots figcaption { font-size: .86rem; color: var(--muted); }
+.dl { font-size: .9rem; color: var(--muted); }
+.dl a { color: var(--ink); font-weight: 700; }
+.notes { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; color: var(--muted); font-size: .95rem; max-width: 62em; }
+footer { border-top: 3px solid var(--line); }
+footer .in { max-width: 1080px; margin: 0 auto; padding-block: 22px 28px; font-size: .85rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .player { width: min(280px, 78%); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .checks, .eps, .steps, .shots { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  :root { --shadow: 4px; }
+  .nav { display: none; }
+  .actions .btn { flex: 1 1 100%; }
+  .ep { grid-template-columns: 112px minmax(0, 1fr); gap: 14px; padding: 12px; }
+  .files li { grid-template-columns: minmax(0, 1fr); }
+  .player .say { left: -6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn { transition: none; }
+}
+</style>
+<!--BODY-->
+<div class="topbar gutter">
+  <div class="in">
+    <a class="brand" href="#top"><i aria-hidden="true"></i>자동차 AX 자료실</a>
+    <nav class="nav" aria-label="구역 이동">
+      <a href="#files">자료 구성</a>
+      <a href="#steps">복습 순서</a>
+      <a href="#checks">확인 숫자</a>
+      <a href="#works">실습 작업물</a>
+      <a href="#videos">영상</a>
+      <a href="#scope">범위</a>
+    </nav>
+    <a class="gh" href="https://github.com/hwangdoohwa/auto-ax-project-1029" target="_blank" rel="noopener">GitHub ↗</a>
+  </div>
+</div>
+
+<main class="gutter">
+<div class="wrap">
+  <header class="hero" id="top">
+    <div class="copy">
+      <p class="eyebrow">자동차특화 AX융합전문가 · 1~4일차</p>
+      <h1>자동차 AX<br><span class="hl">복습 자료실</span></h1>
+      <p class="lede">강의 화면과 핵심 프롬프트를 따라 그대로 다시 실습할 수 있게 정리한 저장소입니다. 기준 슬라이드 31장을 95장 강의안으로 펼치고, 프롬프트 70개와 브라우저용 실습실을 함께 담았습니다.</p>
+      <div class="actions">
+        <a class="btn" href="https://github.com/hwangdoohwa/auto-ax-project-1029/blob/main/자동차AX_1~4일차_복습실습강의안_20261029_01.pdf" target="_blank" rel="noopener">강의안 PDF 보기 ↗</a>
+        <a class="btn ghost" href="https://github.com/hwangdoohwa/auto-ax-project-1029/blob/main/핵심_프롬프트_모음.md" target="_blank" rel="noopener">프롬프트 70개 ↗</a>
+      </div>
+      <div class="meta"><span>정리일 2026-10-29</span><span>hwangdoohwa</span><span>5~6일차 미포함</span></div>
+    </div>
+    <figure class="player">
+      <span class="say" aria-hidden="true">41초 요약!</span>
+      <video id="hero-video" src="ep02.mp4" poster="ep02_poster.png" controls playsinline preload="metadata"></video>
+      <figcaption>웹툰 숏폼 · 특별편 「1~4일차 복습 자료실」</figcaption>
+    </figure>
+  </header>
+
+  <section class="stats" aria-label="저장소 규모">
+    <div class="stat"><b>31 <em>→</em> 95</b><span>기준 슬라이드를 펼친 강의안 장 수</span></div>
+    <div class="stat"><b>70</b><span>쪽 번호별로 정리한 핵심 프롬프트</span></div>
+    <div class="stat"><b>9 <em>·</em> 5,214</b><span>대조한 강의 전사문 수 · 구간 수</span></div>
+    <div class="stat"><b>3</b><span>복습실습실 탭 (EV · CS 규칙 · 절감액)</span></div>
+  </section>
+
+  <section class="panel" id="files" aria-labelledby="files-h">
+    <div class="head"><p class="eyebrow">자료 구성</p><h2 id="files-h">무엇을 받으면 되나</h2></div>
+    <ul class="files">
+      <li><span class="name"><a href="https://github.com/hwangdoohwa/auto-ax-project-1029/blob/main/자동차AX_1~4일차_복습실습강의안_20261029_01.pdf" target="_blank" rel="noopener">자동차AX_1~4일차_복습실습강의안_20261029_01.pdf</a><span class="tag">수정본</span></span><span class="size">3.8 MB</span><span class="desc">95페이지 강의안. 먼저 보는 파일입니다.</span></li>
+      <li><span class="name"><a href="https://github.com/hwangdoohwa/auto-ax-project-1029/blob/main/자동차AX_1~4일차_복습실습강의안_20261029_01.pptx" target="_blank" rel="noopener">자동차AX_1~4일차_복습실습강의안_20261029_01.pptx</a><span class="tag">수정본</span></span><span class="size">5.4 MB</span><span class="desc">같은 95장의 편집용 파워포인트. 하단 링크로 교수 저장소에 바로 갑니다.</span></li>
+      <li><span class="name"><a href="https://github.com/hwangdoohwa/auto-ax-project-1029/blob/main/핵심_프롬프트_모음.md" target="_blank" rel="noopener">핵심_프롬프트_모음.md</a></span><span class="size">24 KB</span><span class="desc">강의안 쪽 번호별 입력 문구 70개. 복사해서 바로 씁니다.</span></li>
+      <li><span class="name"><a href="https://github.com/hwangdoohwa/auto-ax-project-1029/blob/main/자동차AX_복습강의안_실습자료_배포묶음_20261029.zip" target="_blank" rel="noopener">자동차AX_복습강의안_실습자료_배포묶음_20261029.zip</a></span><span class="size">11.9 MB</span><span class="desc">이전 버전 강의안과 실습자료 폴더(복습실습실.html 포함) 묶음.</span></li>
+      <li><span class="name"><a href="https://github.com/hwangdoohwa/auto-ax-project-1029/blob/main/원본31장_반영대응표.csv" target="_blank" rel="noopener">원본31장_반영대응표.csv</a></span><span class="size">18 KB</span><span class="desc">기준 자료 31장이 95장 중 어디에 들어갔는지 찾는 표.</span></li>
+      <li><span class="name"><a href="https://github.com/hwangdoohwa/auto-ax-project-1029/blob/main/사용안내.md" target="_blank" rel="noopener">사용안내.md</a> · <a href="https://github.com/hwangdoohwa/auto-ax-project-1029/blob/main/출처와_검수범위.md" target="_blank" rel="noopener">출처와_검수범위.md</a></span><span class="size">3 KB · 5 KB</span><span class="desc">실습 순서, 반영한 자료, 직접 실행해 확인한 범위와 하지 않은 범위.</span></li>
+    </ul>
+  </section>
+
+  <section class="panel" id="steps" aria-labelledby="steps-h">
+    <div class="head"><p class="eyebrow">복습 순서</p><h2 id="steps-h">이렇게 따라가세요</h2></div>
+    <ol class="steps">
+      <li><div><strong>강의안부터 엽니다</strong><p>PPTX 화면의 빨간 체크·테두리는 누를 위치, 파란 문장은 입력할 요청입니다.</p></div></li>
+      <li><div><strong>프롬프트는 모음에서 복사합니다</strong><p>핵심_프롬프트_모음.md에 쪽 번호별로 있습니다. 기준 자료 쪽은 대응표 CSV로 찾습니다.</p></div></li>
+      <li><div><strong>ZIP을 풀고 실습실을 엽니다</strong><p>PPTX와 실습자료 폴더를 같은 위치에 두고 실습자료/복습실습실.html을 브라우저로 엽니다. 42·76·82·83·91쪽 보충 실습용입니다.</p></div></li>
+      <li><div><strong>EV 탭에서 CSV를 올립니다</strong><p>Day2_국내EV판매_Top5_실데이터.csv를 ‘파일 선택’으로 올리고 제조사 필터를 바꿔 봅니다.</p></div></li>
+      <li><div><strong>CS 탭에서 규칙 12건을 비교합니다</strong><p>Day4_보증판정_테스트사례12_가상.csv를 올립니다. 가상 매뉴얼 규칙 시연이며 RAG·LLM 정확도 평가가 아닙니다.</p></div></li>
+      <li><div><strong>절감액 탭에서 입력값을 바꿔 봅니다</strong><p>기본값으로 연간 환산액을 확인하고, 비율을 0으로 바꿔 결과가 어떻게 달라지는지 봅니다.</p></div></li>
+    </ol>
+  </section>
+
+  <section class="panel" id="checks" aria-labelledby="check-h">
+    <div class="head"><p class="eyebrow">확인 숫자</p><h2 id="check-h">이 값이 나오면 맞게 한 겁니다</h2></div>
+    <div class="checks">
+      <div class="check"><span class="lbl">EV 탭 · 전체</span><b>19,061대</b><small>5개 모델. 2026년 8월 신규등록 기준이며 시장 전체 합계가 아닙니다.</small></div>
+      <div class="check"><span class="lbl">EV 탭 · 기아 필터</span><b>8,064대</b><small>3개 모델.</small></div>
+      <div class="check assume"><span class="lbl">절감액 탭 · 가정</span><b>32,200,000원/년</b><small>월 2,300건 × 5분 × 70% × 시간당 20,000원. 실제 절감 실적이 아니라 가정에 따른 환산액입니다.</small></div>
+    </div>
+  </section>
+
+  <section class="panel" id="works" aria-labelledby="works-h">
+    <div class="head"><p class="eyebrow">Day5 예지보전 실습 작업물</p><h2 id="works-h">직접 열어 보고 써 보기</h2></div>
+    <a class="app-card" href="sensor-app/" target="_blank" rel="noopener">
+      <span class="app-k">웹앱</span>
+      <strong>설비센서 이상 후보 탐지기 ↗</strong>
+      <span>센서 CSV를 올리면 설비별 평균·표준편차·평상 범위(평균 ± kσ)와 이상 후보를 계산하고, 결과를 PPTX 덱으로 내려받습니다. 예시로 설비센서 50건(가상)이 들어 있습니다.</span>
+    </a>
+    <div class="shots">
+      <figure><a href="day5/case5.png" target="_blank" rel="noopener"><img src="day5/case5.png" alt="예지보전 도입사례 5건 인포그래픽: 기업별 센서, 예측 대상, 보고된 효과" loading="lazy"></a><figcaption>인포그래픽 · 예지보전 도입사례 5건 (실데이터)</figcaption></figure>
+      <figure><a href="day5/sensor_story.png" target="_blank" rel="noopener"><img src="day5/sensor_story.png" alt="설비센서 50건 인포그래픽: 튄 값과 추세 비교" loading="lazy"></a><figcaption>인포그래픽 · 설비센서 50건 튄 값 vs 추세 (가상)</figcaption></figure>
+      <figure><a href="day5/sensor_timeseries.png" target="_blank" rel="noopener"><img src="day5/sensor_timeseries.png" alt="설비별 진동·온도·압력 시계열과 평상 범위" loading="lazy"></a><figcaption>분석 차트 · 평상 범위(평균 ± 2σ)와 이상 후보</figcaption></figure>
+      <figure><a href="day5/sensor_zscore.png" target="_blank" rel="noopener"><img src="day5/sensor_zscore.png" alt="설비별 z-점수 히트맵" loading="lazy"></a><figcaption>분석 차트 · z-점수 히트맵</figcaption></figure>
+    </div>
+    <p class="dl">표 파일: <a href="day5/sensor_flags.csv">50건 판정표 CSV</a> · <a href="day5/sensor_stats.csv">통계·평상 범위 CSV</a> · <a href="day5/infographic_notes.md">인포그래픽 검증 메모</a></p>
+  </section>
+
+  <section class="panel" id="videos" aria-labelledby="ep-h">
+    <div class="head"><p class="eyebrow">웹툰 숏폼 · AX 현장 일기</p><h2 id="ep-h">영상으로 먼저 보기</h2></div>
+    <div class="eps">
+      <article class="ep">
+        <video src="ep02.mp4" poster="ep02_poster.png" controls playsinline preload="none"></video>
+        <div class="t"><span class="no">특별편 · 41초</span><h3>1~4일차 복습 자료실</h3><p>4일치 강의를 언제 다시 보나 걱정하는 신입에게, 저장소 하나로 정리된 강의안과 절감액 손계산을 보여 줍니다.</p></div>
+      </article>
+      <article class="ep">
+        <video src="ep01.mp4" poster="ep01_poster.png" controls playsinline preload="none"></video>
+        <div class="t"><span class="no">EP.01 · 41초</span><h3>용광로가 배우다</h3><p>5일차 후킹 케이스. 열어 볼 수 없는 고로를 둘러싼 신호로 읽고, 추세로 1시간 먼저 이상을 잡는 이야기입니다.</p></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel" id="scope" aria-labelledby="scope-h">
+    <div class="head"><p class="eyebrow">범위와 출처</p><h2 id="scope-h">쓰기 전에 알아 둘 것</h2></div>
+    <ul class="notes">
+      <li>수강을 마친 1~4일차만 담았습니다. 5~6일차는 포함하지 않습니다.</li>
+      <li>기준 자료 「자동차AX_명진숙.pptx」, 교수 교재·전사문·강의 메모와 실습 결과를 바탕으로 정리했습니다.</li>
+      <li>기존 CS챗봇·VOC 대시보드 HTML의 일부 AI 기능은 외부 실행 환경 연결이 필요합니다. 복습실습실.html은 외부 AI 없이 돌아갑니다.</li>
+      <li>원자료의 권리는 각 권리자에게 있습니다. 이 저장소에는 별도 오픈소스 라이선스가 없으니 재배포 전에 이용 조건을 확인하세요.</li>
+      <li>영상 속 고로 온도 등 숫자 일부는 설명용 가정값이며 화면에 (예시)·(가정)으로 표시했습니다.</li>
+    </ul>
+  </section>
+</div>
+</main>
+
+<footer class="gutter">
+  <div class="in">
+    <span>자동차 AX 자료 정리 · github.com/hwangdoohwa/auto-ax-project-1029</span>
+    <a href="https://github.com/keerhee/kma-auto-genai-3-1" target="_blank" rel="noopener">교수님 강의자료 저장소 ↗</a>
+  </div>
+</footer>
