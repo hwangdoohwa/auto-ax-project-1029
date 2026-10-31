@@ -10,7 +10,7 @@
 | 설비A 프레스 메인모터 | 점검 권고(단발 튐) | 해당 없음 | 12:40 진동 3.5 한 번만 5표, 바로 정상 복귀 |
 
 - [예지보전 보고서 웹앱](https://hwangdoohwa.github.io/auto-ax-project-1029/pdm-report/) — 기법·임계값을 바꾸면 판정이 다시 계산됨. 소스는 `report_app/`
-- [예지보전 보고서 PDF](예지보전_보고서.pdf) — 현황 진단 · 이상 패턴과 원인 추정 · 정비 권고 시점 · 개선안(점검 주기 · 임계값). 추정한 부분은 "(추정)"으로 표시
+- [예지보전 보고서 PDF](예지보전_보고서.pdf) — 현황 진단 · 이상 패턴과 원인 추정 · 정비 권고 시점 · 개선안(점검 주기 · 임계값) · 유지보수 4단계 진단과 예측 정비 효과. 추정한 부분은 "(추정)"으로 표시
 - [구글 시트](https://docs.google.com/spreadsheets/d/1WIAS0qqYMprRdzTr3ZxAuTdqk356TdoK8fY6MPpJ5S0/edit) · [공개 페이지](https://hwangdoohwa.github.io/auto-ax-project-1029/#works)
 
 ## 기법과 판정 규칙
