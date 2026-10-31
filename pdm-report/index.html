@@ -127,7 +127,7 @@ footer a{font-weight:700}
   <div class="wrap">
     <p class="eyebrow">자동차특화 AX융합전문가 · Day5 예지보전 실습</p>
     <h1>설비센서 예지보전 보고서<br>설비B는 13:20이 정비 필요 시점</h1>
-    <p class="lead">이상치 탐지 6기법(Z-점수 · 마할라노비스 · Isolation Forest · LOF · One-Class SVM · CUSUM)이 시점마다 표를 던지고, 다수결로 정비 필요 시점을 정했습니다. 아래에서 기법과 임계값을 바꾸면 판정이 바로 다시 계산됩니다.</p>
+    <p class="lead">유지보수 4단계 중 지금은 ③ 예측 정비의 초입입니다. 이상치 탐지 6기법(Z-점수 · 마할라노비스 · Isolation Forest · LOF · One-Class SVM · CUSUM)이 시점마다 표를 던지고, 다수결로 정비 필요 시점을 정했습니다. 아래에서 기법과 임계값을 바꾸면 판정이 바로 다시 계산됩니다.</p>
     <div class="row">
       <span class="badge">실습용 가상 데이터</span>
       <button class="btn primary" id="share" type="button">링크 복사</button>
@@ -264,6 +264,40 @@ footer a{font-weight:700}
         <li>정비 후 새 상태로 다시 학습하고, 점검 결과를 기록해 추정 원인을 확인합니다.</li>
       </ul>
       <p class="sub">'개선안 적용' 버튼을 누르면 위 제안 중 CUSUM 4 · One-Class SVM 제외 · 3표 규칙이 차트에 바로 적용됩니다. Isolation Forest·LOF 변경은 다시 학습해야 해서 이 앱에서는 바꿀 수 없습니다.</p>
+    </details>
+    <details class="sec">
+      <summary>5. 유지보수 단계 진단과 다음 단계</summary>
+      <p>우리 설비는 유지보수 4단계(① 사후 → ② 예방 → ③ 예측(예지보전) → ④ 처방) 중 <b>③ 예측 정비의 초입</b>입니다. 분석으로는 징후 기반 정비 시점(설비B 13:20)을 찾았지만, 운영은 아직 주기·사람 판정 중심의 ② 예방 정비 방식입니다.</p>
+      <div class="flow"><div><b>① 사후</b>고장 후 수리</div><div><b>② 예방</b>주기마다 교체</div><div class="ok"><b>③ 예측 ← 지금</b>징후로 필요할 때만</div><div><b>④ 처방</b>AI가 원인·조치 제안</div></div>
+      <div class="tablewrap"><table>
+        <tr><th>기준</th><th>지금 상태</th><th>해당 단계</th></tr>
+        <tr><td>정비 기준</td><td>센서가 감지한 징후로 정비 시점을 정함 (설비B 13:20)</td><td>③ 예측</td></tr>
+        <tr><td>데이터</td><td>진동·온도·압력을 함께 보고 단발 튐과 지속 추세를 구분</td><td>③ 예측</td></tr>
+        <tr><td>운영</td><td>하루치 가상 데이터 50건을 사후 분석, 20분 간격 측정, 사람이 판정</td><td>② → ③ 사이</td></tr>
+        <tr><td>원인·조치</td><td>원인은 추정뿐이고, 무엇을 고칠지는 사람이 정함</td><td>④ 처방 아님</td></tr>
+      </table></div>
+      <h3>③ 예측 정비를 운영에 정착시키려면</h3>
+      <ol>
+        <li>실시간 수집과 자동 판정. 관찰 단계에서는 측정 간격을 5분으로 좁힘</li>
+        <li>정상 기준을 오전 12건에서 정상 운전 1~2주로 늘리고, 교대·부하별로 나눔</li>
+        <li>감속기 제조사의 온도·진동 한계값 확보 — 있어야 고장까지 남은 시간을 계산할 수 있음</li>
+        <li>탐지 → 검토 → 승인 → 정비 절차를 보전관리 시스템(CMMS)과 연결</li>
+      </ol>
+      <h3>④ 처방 정비로 가려면</h3>
+      <ol>
+        <li>정비 결과를 원인과 조치로 기록해 학습용 라벨로 쌓음 (예: 설비B 원인이 실제로 윤활 부족이었는지)</li>
+        <li>원인을 가를 데이터 추가: 부하·생산량, 주위 온도, 진동 주파수, 급유 이력</li>
+        <li>쌓인 이력으로 "이 패턴이면 이 조치"를 제안하는 모델을 만들되, 사람 승인 단계는 유지</li>
+      </ol>
+      <h3>예방 정비 대비 예측 정비 효과</h3>
+      <p><b>예측 정비는 멀쩡한 부품을 주기마다 바꾸지 않고 필요할 때만 정비해, 실제 도입 사례에서 비계획 정지 12% 감소(Siemens 고객 OEM, 12주), 돌발정비 약 50% 감소(포스코), 조립 중단 연 500분 이상 회피(BMW)를 보고했습니다. 이번 데이터에서도 진동 급증 1시간 40분 전(13:20)에 정비 시점을 잡았습니다.</b></p>
+      <div class="tablewrap"><table>
+        <tr><th>사례</th><th>보고된 효과</th><th>출처</th></tr>
+        <tr><td>포스코 포항제철소 (2026)</td><td>돌발정비 전년 동기 대비 약 50% 감소</td><td><a href="https://newsroom.posco.com/kr/?p=133451" target="_blank" rel="noopener">POSCO 뉴스룸</a></td></tr>
+        <tr><td>익명 글로벌 자동차 OEM, Siemens Senseye (2025)</td><td>도입 12주 만에 비계획 정지 12% 감소</td><td><a href="https://blogs.sw.siemens.com/automotive-transportation/2025/04/28/predictive-maintenance-for-automotive-smart-manufacturing/" target="_blank" rel="noopener">Siemens 블로그</a></td></tr>
+        <tr><td>BMW 레겐스부르크 공장 (2023)</td><td>연간 500분 이상의 조립 중단 회피</td><td><a href="https://press.bmwgroup.com/global/article/detail/T0438145EN/smart-maintenance-using-artificial-intelligence" target="_blank" rel="noopener">BMW 프레스</a></td></tr>
+      </table></div>
+      <p class="sub">사례 수치는 과정 자료 Day5_예지보전_도입사례_실데이터.csv에 보고된 값 그대로이며, 예방 정비 대비가 아니라 도입 전 대비 효과입니다. 비용 절감액은 공개된 사례가 없어 넣지 않았습니다. 우리 설비에서 같은 효과가 날지는 운영 데이터로 확인해야 합니다 <span class="est">추정</span></p>
     </details>
     <div class="note">탐지 결과는 고장 확정이 아닙니다. 설비를 자동으로 멈추지 않고, 담당자 검토·승인 뒤 비가동 시간에 정비합니다. 데이터는 과정 실습용 가상 데이터입니다.</div>
   </section>
