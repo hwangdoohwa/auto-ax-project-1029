@@ -9,7 +9,7 @@
 - [설비센서 이상 후보 탐지기 (웹앱)](https://hwangdoohwa.github.io/auto-ax-project-1029/sensor-app/) — 센서 CSV 업로드 → 평균·표준편차·평상 범위·이상 후보 계산 → PPTX 덱 내려받기
 - [인포그래픽 · 예지보전 도입사례 5건](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/case5.png) · [인포그래픽 · 설비센서 50건 튄 값 vs 추세](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/sensor_story.png)
 - [분석 차트 · 평상 범위와 이상 후보](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/sensor_timeseries.png) · [z-점수 히트맵](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/sensor_zscore.png)
-- [머신러닝 이상치 탐지 6기법 · 정비 필요 시점](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/ml/infographic.png) — 설비B 13:20 정비 필요, 설비A 12:40 단발 튐 · [구글 시트](https://docs.google.com/spreadsheets/d/1WIAS0qqYMprRdzTr3ZxAuTdqk356TdoK8fY6MPpJ5S0/edit) · [예지보전 보고서 PDF](작업물/ml_anomaly_day5/예지보전_보고서.pdf) · [코드](작업물/ml_anomaly_day5/)
+- [머신러닝 이상치 탐지 6기법 · 정비 필요 시점](https://hwangdoohwa.github.io/auto-ax-project-1029/day5/ml/infographic.png) — 설비B 13:20 정비 필요, 설비A 12:40 단발 튐 · [구글 시트](https://docs.google.com/spreadsheets/d/1WIAS0qqYMprRdzTr3ZxAuTdqk356TdoK8fY6MPpJ5S0/edit) · [예지보전 보고서 웹앱](https://hwangdoohwa.github.io/auto-ax-project-1029/pdm-report/) · [예지보전 보고서 PDF](작업물/ml_anomaly_day5/예지보전_보고서.pdf) · [코드](작업물/ml_anomaly_day5/)
 - 만든 코드: [작업물 폴더](작업물/)
 
 ## 수정본 다운로드 (_01)
