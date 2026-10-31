@@ -149,6 +149,8 @@ section[id], header[id] { scroll-margin-top: 84px; }
 .shots figcaption { font-size: .86rem; color: var(--muted); }
 .dl { font-size: .9rem; color: var(--muted); }
 .dl a { color: var(--ink); font-weight: 700; }
+.sub { margin: 18px 0 0; font-size: 1.15rem; color: var(--ink); }
+.shots figure:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
 .notes { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; color: var(--muted); font-size: .95rem; max-width: 62em; }
 footer { border-top: 3px solid var(--line); }
 footer .in { max-width: 1080px; margin: 0 auto; padding-block: 22px 28px; font-size: .85rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
@@ -262,6 +264,15 @@ footer .in { max-width: 1080px; margin: 0 auto; padding-block: 22px 28px; font-s
       <figure><a href="day5/sensor_timeseries.png" target="_blank" rel="noopener"><img src="day5/sensor_timeseries.png" alt="설비별 진동·온도·압력 시계열과 평상 범위" loading="lazy"></a><figcaption>분석 차트 · 평상 범위(평균 ± 2σ)와 이상 후보</figcaption></figure>
       <figure><a href="day5/sensor_zscore.png" target="_blank" rel="noopener"><img src="day5/sensor_zscore.png" alt="설비별 z-점수 히트맵" loading="lazy"></a><figcaption>분석 차트 · z-점수 히트맵</figcaption></figure>
     </div>
+    <h3 class="sub">머신러닝 이상치 탐지 6기법 · 정비 필요 시점</h3>
+    <div class="shots">
+      <figure><a href="day5/ml/infographic.png" target="_blank" rel="noopener"><img src="day5/ml/infographic.png" alt="6기법 다수결로 찾은 정비 필요 시점 인포그래픽: 설비B 13:20 정비 필요, 설비A 12:40 단발 튐" loading="lazy"></a><figcaption>SVG 인포그래픽 · 설비B 정비 필요 시점 13:20</figcaption></figure>
+      <figure><a href="day5/ml/timeseries.png" target="_blank" rel="noopener"><img src="day5/ml/timeseries.png" alt="설비별 시계열에 다수결 판정 색과 정비 필요 시점 표시" loading="lazy"></a><figcaption>시계열 · 다수결 판정</figcaption></figure>
+      <figure><a href="day5/ml/heatmap.png" target="_blank" rel="noopener"><img src="day5/ml/heatmap.png" alt="기법 6개 × 시간 탐지 히트맵과 득표 막대" loading="lazy"></a><figcaption>기법별 탐지 히트맵 · 득표</figcaption></figure>
+      <figure><a href="day5/ml/scores.png" target="_blank" rel="noopener"><img src="day5/ml/scores.png" alt="설비B 기법별 이상 점수와 임계값" loading="lazy"></a><figcaption>설비B 점수 곡선 · 첫 탐지</figcaption></figure>
+      <figure><a href="day5/ml/feature_space.png" target="_blank" rel="noopener"><img src="day5/ml/feature_space.png" alt="온도 z와 진동 z 특징 공간의 궤적" loading="lazy"></a><figcaption>특징 공간 · 튐(점) vs 추세(궤적)</figcaption></figure>
+    </div>
+    <p class="dl">머신러닝 결과: <a href="https://docs.google.com/spreadsheets/d/1WIAS0qqYMprRdzTr3ZxAuTdqk356TdoK8fY6MPpJ5S0/edit" target="_blank" rel="noopener">구글 시트</a> · <a href="day5/ml/results.csv">시점별 판정 CSV</a> · <a href="day5/ml/methods.csv">기법별 요약 CSV</a> · <a href="day5/ml/decision.csv">정비 판정 CSV</a> · <a href="day5/ml/infographic.svg">인포그래픽 SVG</a></p>
     <p class="dl">표 파일: <a href="day5/sensor_flags.csv">50건 판정표 CSV</a> · <a href="day5/sensor_stats.csv">통계·평상 범위 CSV</a> · <a href="day5/infographic_notes.md">인포그래픽 검증 메모</a></p>
   </section>
 
