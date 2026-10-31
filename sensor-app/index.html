@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>설비센서 이상 탐지기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 계측 콘솔. 위에 입력·설정 띠, 아래로 요약 → 변수별 차트 → 통계표 → 판정표가 한 단으로 흐른다 */
+:root {
+  --bg: #F3F5F8;
+  --surface: #FFFFFF;
+  --ink: #16233D;
+  --muted: #5B6880;
+  --rule: #DCE2EB;
+  --navy: #0E1F3E;
+  --accent: #E8743B;
+  --band: rgba(46, 139, 87, .16);
+  --ok: #2E8B57;
+  --bad: #D23B3B;
+  --bad-soft: #FDECEC;
+  --chip: #EDF1F7;
+  --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1424; --surface: #16213A; --ink: #E8EEF8; --muted: #A2AFC6; --rule: #2A3756; --navy: #0A1222;
+    --accent: #FF8D57; --band: rgba(76, 195, 138, .18); --ok: #4CC38A; --bad: #FF6B6B; --bad-soft: #3A1F28; --chip: #22304E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1424; --surface: #16213A; --ink: #E8EEF8; --muted: #A2AFC6; --rule: #2A3756; --navy: #0A1222;
+  --accent: #FF8D57; --band: rgba(76, 195, 138, .18); --ok: #4CC38A; --bad: #FF6B6B; --bad-soft: #3A1F28; --chip: #22304E;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.in { max-width: 1180px; margin: 0 auto; }
+header.top { background: var(--navy); color: #fff; border-left: 0; }
+header.top .in { padding-block: 22px 20px; display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: baseline; justify-content: space-between; }
+header.top h1 { margin: 0; font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 700; letter-spacing: -.01em; }
+header.top h1 b { color: #F6B22B; font-weight: 700; }
+header.top p { margin: 0; color: #B9C4D8; font-size: .88rem; }
+main .in { display: grid; gap: 22px; padding-block: 22px 56px; }
+h2 { margin: 0; font-size: 1.12rem; font-weight: 700; text-wrap: balance; }
+.sec { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: clamp(16px, 3vw, 24px); display: grid; gap: 16px; min-width: 0; }
+.sec-h { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; justify-content: space-between; }
+.hint { color: var(--muted); font-size: .86rem; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* 입력·설정 */
+.controls { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.drop { border: 2px dashed var(--rule); border-radius: 10px; padding: 16px; display: grid; gap: 8px; align-content: center; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
+.drop:hover, .drop.over { border-color: var(--accent); background: var(--chip); }
+.drop strong { font-size: 1rem; }
+.drop input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.file-now { font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; }
+.box { border: 1px solid var(--rule); border-radius: 10px; padding: 14px; display: grid; gap: 10px; align-content: start; }
+.box label, .box .lbl { font-size: .8rem; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .tabs button { font: inherit; font-size: .88rem; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; }
+.seg button[aria-pressed="true"], .tabs button[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+input[type=number], select { font: inherit; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); width: 84px; }
+select { width: auto; max-width: 100%; }
+.btn { font: inherit; font-weight: 700; padding: 10px 16px; border-radius: 10px; border: 0; background: var(--accent); color: #fff; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; justify-content: center; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--rule); }
+.btn:disabled { opacity: .5; cursor: wait; }
+button:focus-visible, .drop:focus-within, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.msg { font-size: .86rem; min-height: 1.4em; }
+.msg.err { color: var(--bad); font-weight: 700; }
+.msg.ok { color: var(--ok); font-weight: 700; }
+.badge-virtual { display: inline-block; background: var(--bad); color: #fff; font-size: .74rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; vertical-align: 2px; margin-left: 6px; }
+
+/* 요약 */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
+.kpi b { font-family: var(--mono); font-size: 1.9rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi span { color: var(--muted); font-size: .84rem; }
+.kpi.alert { border-color: var(--bad); background: var(--bad-soft); }
+.kpi.alert b { color: var(--bad); }
+
+/* 차트 */
+.eq-block { display: grid; gap: 10px; }
+.eq-name { font-weight: 700; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.eq-name small { color: var(--muted); font-weight: 500; }
+.charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.chart { border: 1px solid var(--rule); border-radius: 10px; padding: 10px 10px 4px; min-width: 0; }
+.chart .ct { display: flex; justify-content: space-between; gap: 8px; font-size: .84rem; font-weight: 700; }
+.chart .ct em { font-style: normal; color: var(--bad); }
+.chart canvas { width: 100%; height: 170px; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .82rem; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 10px; margin-right: 6px; vertical-align: -1px; border-radius: 2px; }
+
+/* 표 */
+.scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 8px 12px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th { background: var(--chip); font-size: .8rem; color: var(--muted); position: sticky; top: 0; }
+th:first-child, td:first-child, th.l, td.l { text-align: left; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+td.hit { color: var(--bad); font-weight: 700; background: var(--bad-soft); }
+tr.flag td.verdict { color: var(--bad); font-weight: 700; }
+td.verdict { text-align: left; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.table-wrap { max-height: 520px; overflow: auto; border: 1px solid var(--rule); border-radius: 10px; }
+.note { font-size: .84rem; color: var(--muted); border-left: 4px solid var(--accent); padding: 8px 12px; background: var(--chip); border-radius: 0 8px 8px 0; }
+
+@media (max-width: 900px) {
+  .controls { grid-template-columns: minmax(0, 1fr); }
+  .charts { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { .drop { transition: none; } }
+</style>
+</head>
+<body>
+<header class="top gutter">
+  <div class="in">
+    <h1>설비센서 <b>이상 후보</b> 탐지기</h1>
+    <p>CSV를 올리면 설비별 평균·표준편차·평상 범위를 계산하고, 결과를 PPTX 덱으로 내려받습니다.</p>
+  </div>
+</header>
+
+<main class="gutter">
+<div class="in">
+  <section class="sec" aria-labelledby="in-h">
+    <div class="sec-h"><h2 id="in-h">1. 데이터 올리기와 기준 정하기</h2><span class="hint">파일은 브라우저 안에서만 처리되고 어디로도 보내지 않습니다.</span></div>
+    <div class="controls">
+      <label class="drop" id="drop" for="file">
+        <strong>CSV 파일을 끌어다 놓거나 눌러서 선택</strong>
+        <span class="hint">열: 시간 · 설비(선택) · 숫자 변수들 (예: 진동(mm/s), 온도(℃), 압력(bar)) · UTF-8/CP949</span>
+        <input type="file" id="file" accept=".csv,text/csv">
+        <span class="file-now" id="fileNow"></span>
+      </label>
+      <div class="box">
+        <span class="lbl">평상 범위 = 평균 ± k × 표준편차</span>
+        <div class="seg" id="kSeg" role="group" aria-label="k 값">
+          <button type="button" data-k="2" aria-pressed="true">k = 2</button>
+          <button type="button" data-k="2.5" aria-pressed="false">2.5</button>
+          <button type="button" data-k="3" aria-pressed="false">3</button>
+        </div>
+        <span class="lbl">평균·표준편차를 구할 기준 구간</span>
+        <div class="seg" id="baseSeg" role="group" aria-label="기준 구간">
+          <button type="button" data-base="all" aria-pressed="true">전체 데이터</button>
+          <button type="button" data-base="first" aria-pressed="false">설비별 처음 N건</button>
+        </div>
+        <div class="row"><label for="baseN">N</label><input type="number" id="baseN" min="3" value="12"><span class="hint">정상으로 보이는 앞부분</span></div>
+      </div>
+      <div class="box">
+        <span class="lbl">결과 내려받기</span>
+        <button class="btn" type="button" id="pptBtn">PPTX 덱 만들기</button>
+        <button class="btn ghost" type="button" id="csvBtn">판정표 CSV</button>
+        <button class="btn ghost" type="button" id="sampleBtn">예시 데이터 다시 불러오기</button>
+        <div class="msg" id="msg" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="요약"></section>
+
+  <section class="sec" aria-labelledby="ch-h">
+    <div class="sec-h"><h2 id="ch-h">2. 변수별 추이와 평상 범위</h2>
+      <div class="legend"><span><i style="background:var(--band)"></i>평상 범위</span><span><i style="background:var(--ok);height:2px"></i>평균</span><span><i style="background:var(--bad);border-radius:50%;width:10px"></i>이상 후보</span></div>
+    </div>
+    <div id="charts" class="eq-list" style="display:grid;gap:20px"></div>
+  </section>
+
+  <section class="sec" aria-labelledby="st-h">
+    <div class="sec-h"><h2 id="st-h">3. 설비별 통계</h2><span class="hint">표준편차는 표본 표준편차(n−1)</span></div>
+    <div class="scroll"><table id="statTable"></table></div>
+  </section>
+
+  <section class="sec" aria-labelledby="tb-h">
+    <div class="sec-h"><h2 id="tb-h">4. 시간별 판정표</h2>
+      <div class="row">
+        <div class="tabs" role="tablist" id="tabs">
+          <button type="button" role="tab" data-f="all" aria-selected="true">전체</button>
+          <button type="button" role="tab" data-f="flag" aria-selected="false">이상 후보만</button>
+        </div>
+        <select id="eqSel" aria-label="설비 선택"></select>
+      </div>
+    </div>
+    <div class="table-wrap"><table id="dataTable"></table></div>
+    <p class="note">이상 후보는 고장 확정이 아닙니다. 센서 오류·운영 맥락을 확인하고 담당자가 검토·승인한 뒤 정비를 결정합니다. 탐지 결과로 설비를 자동 정지하지 않습니다.</p>
+  </section>
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script>
+const SAMPLE_NAME = "Day5_설비센서_50건_가상.csv";
+const SAMPLE_CSV = "시간,설비,진동(mm/s),온도(℃),압력(bar),비고\n2026-09-15 08:00,설비A(프레스 메인모터),0.99,51.0,120.8,실습용 가상 데이터\n2026-09-15 08:20,설비A(프레스 메인모터),1.05,51.7,118.7,실습용 가상 데이터\n2026-09-15 08:40,설비A(프레스 메인모터),0.92,51.9,121.5,실습용 가상 데이터\n2026-09-15 09:00,설비A(프레스 메인모터),0.93,52.9,119.6,실습용 가상 데이터\n2026-09-15 09:20,설비A(프레스 메인모터),1.05,51.6,120.9,실습용 가상 데이터\n2026-09-15 09:40,설비A(프레스 메인모터),1.0,51.5,119.9,실습용 가상 데이터\n2026-09-15 10:00,설비A(프레스 메인모터),0.93,50.9,118.8,실습용 가상 데이터\n2026-09-15 10:20,설비A(프레스 메인모터),0.96,51.5,118.3,실습용 가상 데이터\n2026-09-15 10:40,설비A(프레스 메인모터),0.93,51.1,118.3,실습용 가상 데이터\n2026-09-15 11:00,설비A(프레스 메인모터),0.96,51.6,120.0,실습용 가상 데이터\n2026-09-15 11:20,설비A(프레스 메인모터),1.06,52.1,118.1,실습용 가상 데이터\n2026-09-15 11:40,설비A(프레스 메인모터),1.0,51.8,121.4,실습용 가상 데이터\n2026-09-15 12:00,설비A(프레스 메인모터),1.1,52.5,121.9,실습용 가상 데이터\n2026-09-15 12:20,설비A(프레스 메인모터),0.9,51.0,118.6,실습용 가상 데이터\n2026-09-15 12:40,설비A(프레스 메인모터),3.5,52.8,119.9,실습용 가상 데이터\n2026-09-15 13:00,설비A(프레스 메인모터),1.0,50.9,119.0,실습용 가상 데이터\n2026-09-15 13:20,설비A(프레스 메인모터),1.04,51.8,121.8,실습용 가상 데이터\n2026-09-15 13:40,설비A(프레스 메인모터),0.94,53.1,118.6,실습용 가상 데이터\n2026-09-15 14:00,설비A(프레스 메인모터),1.06,52.5,121.3,실습용 가상 데이터\n2026-09-15 14:20,설비A(프레스 메인모터),1.06,51.0,118.1,실습용 가상 데이터\n2026-09-15 14:40,설비A(프레스 메인모터),1.02,51.6,120.3,실습용 가상 데이터\n2026-09-15 15:00,설비A(프레스 메인모터),1.03,52.8,118.9,실습용 가상 데이터\n2026-09-15 15:20,설비A(프레스 메인모터),0.99,50.9,120.9,실습용 가상 데이터\n2026-09-15 15:40,설비A(프레스 메인모터),0.93,51.7,118.5,실습용 가상 데이터\n2026-09-15 16:00,설비A(프레스 메인모터),1.03,52.1,118.2,실습용 가상 데이터\n2026-09-15 08:00,설비B(차체 용접로봇 감속기),0.94,55.6,118.4,실습용 가상 데이터\n2026-09-15 08:20,설비B(차체 용접로봇 감속기),1.05,54.6,117.4,실습용 가상 데이터\n2026-09-15 08:40,설비B(차체 용접로봇 감속기),1.03,55.5,118.0,실습용 가상 데이터\n2026-09-15 09:00,설비B(차체 용접로봇 감속기),1.03,55.8,116.1,실습용 가상 데이터\n2026-09-15 09:20,설비B(차체 용접로봇 감속기),1.05,55.8,118.3,실습용 가상 데이터\n2026-09-15 09:40,설비B(차체 용접로봇 감속기),1.0,55.3,117.4,실습용 가상 데이터\n2026-09-15 10:00,설비B(차체 용접로봇 감속기),1.05,55.7,116.8,실습용 가상 데이터\n2026-09-15 10:20,설비B(차체 용접로봇 감속기),1.01,54.8,118.8,실습용 가상 데이터\n2026-09-15 10:40,설비B(차체 용접로봇 감속기),1.01,54.1,117.5,실습용 가상 데이터\n2026-09-15 11:00,설비B(차체 용접로봇 감속기),0.96,55.7,118.2,실습용 가상 데이터\n2026-09-15 11:20,설비B(차체 용접로봇 감속기),1.02,55.4,117.1,실습용 가상 데이터\n2026-09-15 11:40,설비B(차체 용접로봇 감속기),1.01,55.8,118.0,실습용 가상 데이터\n2026-09-15 12:00,설비B(차체 용접로봇 감속기),1.04,54.3,118.8,실습용 가상 데이터\n2026-09-15 12:20,설비B(차체 용접로봇 감속기),1.04,55.4,119.9,실습용 가상 데이터\n2026-09-15 12:40,설비B(차체 용접로봇 감속기),1.06,56.7,117.3,실습용 가상 데이터\n2026-09-15 13:00,설비B(차체 용접로봇 감속기),1.05,58.2,116.7,실습용 가상 데이터\n2026-09-15 13:20,설비B(차체 용접로봇 감속기),1.08,57.8,117.3,실습용 가상 데이터\n2026-09-15 13:40,설비B(차체 용접로봇 감속기),1.1,59.3,119.9,실습용 가상 데이터\n2026-09-15 14:00,설비B(차체 용접로봇 감속기),1.12,60.9,119.4,실습용 가상 데이터\n2026-09-15 14:20,설비B(차체 용접로봇 감속기),1.09,60.7,119.5,실습용 가상 데이터\n2026-09-15 14:40,설비B(차체 용접로봇 감속기),1.0,61.4,119.3,실습용 가상 데이터\n2026-09-15 15:00,설비B(차체 용접로봇 감속기),1.3,63.3,116.5,실습용 가상 데이터\n2026-09-15 15:20,설비B(차체 용접로봇 감속기),1.7,63.3,118.7,실습용 가상 데이터\n2026-09-15 15:40,설비B(차체 용접로봇 감속기),2.2,64.0,119.9,실습용 가상 데이터\n2026-09-15 16:00,설비B(차체 용접로봇 감속기),2.9,65.1,118.6,실습용 가상 데이터\n";
+const LS = "sensor-app-v1";
+const S = { name: "", rows: [], cols: null, k: 2, base: "all", baseN: 12, filter: "all", eq: "__all", res: null, virtual: false };
+const $ = (id) => document.getElementById(id);
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+function save() { try { localStorage.setItem(LS, JSON.stringify({ name: S.name, text: S.text, k: S.k, base: S.base, baseN: S.baseN, filter: S.filter, eq: S.eq })); } catch (e) {} }
+function load() { try { return JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) { return null; } }
+function msg(t, cls = "") { const m = $("msg"); m.textContent = t; m.className = "msg " + cls; }
+
+// ---------- CSV ----------
+function parseCSV(text) {
+  const out = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(cur); cur = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cur); cur = ""; if (row.some((x) => x.trim() !== "")) out.push(row); row = []; }
+    else cur += c;
+  }
+  row.push(cur); if (row.some((x) => x.trim() !== "")) out.push(row);
+  return out;
+}
+function decode(buf) {
+  try { return new TextDecoder("utf-8", { fatal: true }).decode(buf).replace(/^﻿/, ""); }
+  catch (e) { return new TextDecoder("euc-kr").decode(buf); }
+}
+function detect(table) {
+  const head = table[0].map((h) => h.trim()), body = table.slice(1);
+  if (!body.length) throw new Error("데이터 행이 없습니다. 첫 줄은 열 이름, 둘째 줄부터 값이어야 합니다.");
+  const num = (v) => v !== undefined && v.trim() !== "" && isFinite(Number(v.replace(/,/g, "")));
+  const ti = head.findIndex((h) => /시간|일시|날짜|time|date|timestamp/i.test(h));
+  const gi = head.findIndex((h) => /설비|장비|기계|라인|equipment|machine|asset|device/i.test(h));
+  const vars = head.map((h, i) => ({ h, i })).filter(({ i }) => i !== ti && i !== gi && body.filter((r) => num(r[i])).length >= body.length * 0.8);
+  if (!vars.length) throw new Error("숫자 열을 찾지 못했습니다. 진동·온도처럼 숫자로 된 열이 하나 이상 있어야 합니다.");
+  return { head, ti, gi, vars: vars.map(({ h, i }) => { const m = h.match(/^(.*?)\s*\((.*)\)\s*$/); return { i, h, name: m ? m[1] : h, unit: m ? m[2] : "" }; }) };
+}
+function ingest(text, name) {
+  const table = parseCSV(text);
+  if (table.length < 2) throw new Error("CSV에 열 이름과 데이터가 필요합니다.");
+  const cols = detect(table);
+  const rows = table.slice(1).map((r, n) => ({
+    n, t: cols.ti >= 0 ? (r[cols.ti] || "").trim() : String(n + 1),
+    eq: cols.gi >= 0 ? (r[cols.gi] || "").trim() || "(이름 없음)" : "전체",
+    v: cols.vars.map((c) => { const x = Number((r[c.i] || "").replace(/,/g, "")); return (r[c.i] || "").trim() === "" || !isFinite(x) ? null : x; }),
+    raw: r,
+  }));
+  S.text = text; S.name = name; S.cols = cols; S.rows = rows;
+  S.virtual = /가상|synthetic|virtual|dummy/i.test(name + " " + text.slice(0, 4000).split("\n").slice(1, 6).join(" "));
+}
+
+// ---------- 계산 ----------
+function analyze() {
+  const eqs = [...new Set(S.rows.map((r) => r.eq))], k = S.k, out = { eqs, stats: {}, flags: new Map(), k };
+  for (const e of eqs) {
+    const rs = S.rows.filter((r) => r.eq === e);
+    S.cols.vars.forEach((c, j) => {
+      const all = rs.map((r) => r.v[j]).filter((x) => x !== null);
+      const base = S.base === "first" ? rs.slice(0, Math.max(3, S.baseN)).map((r) => r.v[j]).filter((x) => x !== null) : all;
+      const n = base.length, m = base.reduce((a, b) => a + b, 0) / n;
+      const sd = n > 1 ? Math.sqrt(base.reduce((a, b) => a + (b - m) ** 2, 0) / (n - 1)) : 0;
+      const lo = m - k * sd, hi = m + k * sd;
+      let cnt = 0;
+      rs.forEach((r) => { const x = r.v[j]; if (x !== null && (x < lo || x > hi)) { cnt++; if (!out.flags.has(r.n)) out.flags.set(r.n, []); out.flags.get(r.n).push({ j, dir: x > hi ? "↑" : "↓" }); } });
+      out.stats[e + "|" + j] = { n, m, sd, lo, hi, cnt, min: Math.min(...all), max: Math.max(...all) };
+    });
+  }
+  S.res = out;
+}
+const f2 = (x) => (Math.abs(x) >= 1000 ? x.toLocaleString("ko-KR", { maximumFractionDigits: 1 }) : x.toFixed(2));
+
+// ---------- 차트 (화면·PPTX 공용 캔버스 그리기) ----------
+function drawChart(cv, e, j, opt = {}) {
+  const W = opt.w || cv.clientWidth || 360, H = opt.h || 170, dpr = opt.dpr || Math.min(2, window.devicePixelRatio || 1);
+  cv.width = W * dpr; cv.height = H * dpr; const g = cv.getContext("2d"); g.scale(dpr, dpr);
+  const pal = opt.pal || { ink: css("--ink"), muted: css("--muted"), rule: css("--rule"), band: css("--band"), ok: css("--ok"), bad: css("--bad"), bg: "transparent" };
+  if (pal.bg !== "transparent") { g.fillStyle = pal.bg; g.fillRect(0, 0, W, H); }
+  const st = S.res.stats[e + "|" + j], rs = S.rows.filter((r) => r.eq === e);
+  const fs = opt.fs || 11, L = fs * 4.2, R = 10, T = 10, B = fs * 2.2;
+  let lo = Math.min(st.min, st.lo), hi = Math.max(st.max, st.hi); const pad = (hi - lo || 1) * 0.08; lo -= pad; hi += pad;
+  const X = (i) => L + (rs.length > 1 ? (i / (rs.length - 1)) * (W - L - R) : (W - L - R) / 2), Y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  g.font = `${fs}px ${opt.font || css("--sans") || "sans-serif"}`; g.textBaseline = "middle";
+  for (let i = 0; i <= 4; i++) { const v = lo + ((hi - lo) * i) / 4, y = Y(v); g.strokeStyle = pal.rule; g.lineWidth = 1; g.beginPath(); g.moveTo(L, y); g.lineTo(W - R, y); g.stroke(); g.fillStyle = pal.muted; g.textAlign = "right"; g.fillText(f2(v), L - 6, y); }
+  g.fillStyle = pal.band; g.fillRect(L, Y(st.hi), W - L - R, Y(st.lo) - Y(st.hi));
+  g.strokeStyle = pal.ok; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(L, Y(st.m)); g.lineTo(W - R, Y(st.m)); g.stroke(); g.setLineDash([]);
+  g.strokeStyle = pal.ink; g.lineWidth = 1.6; g.beginPath(); let started = false;
+  rs.forEach((r, i) => { const x = r.v[j]; if (x === null) { started = false; return; } started ? g.lineTo(X(i), Y(x)) : g.moveTo(X(i), Y(x)); started = true; }); g.stroke();
+  const step = Math.max(1, Math.ceil(rs.length / (W / (fs * 5.5))));
+  g.textAlign = "center"; g.fillStyle = pal.muted;
+  rs.forEach((r, i) => { if (i % step === 0 || i === rs.length - 1) { g.textAlign = i === rs.length - 1 ? "right" : i === 0 ? "left" : "center"; g.fillText(shortT(r.t), i === rs.length - 1 ? W - R : i === 0 ? L - 4 : X(i), H - B / 2); } });
+  rs.forEach((r, i) => { const x = r.v[j]; if (x === null) return; const bad = x < st.lo || x > st.hi; g.fillStyle = bad ? pal.bad : pal.ink; g.beginPath(); g.arc(X(i), Y(x), bad ? fs * 0.45 : fs * 0.22, 0, 7); g.fill(); });
+}
+const shortT = (t) => { const m = t.match(/(\d{1,2}:\d{2})/); return m ? m[1] : t.slice(-8); };
+
+// ---------- 화면 ----------
+function render() {
+  analyze(); const { eqs, stats, flags } = S.res, V = S.cols.vars;
+  $("fileNow").innerHTML = ""; const fn = document.createElement("span"); fn.textContent = `현재: ${S.name} · ${S.rows.length}행 · 변수 ${V.length}개`; $("fileNow").append(fn);
+  if (S.virtual) { const b = document.createElement("span"); b.className = "badge-virtual"; b.textContent = "실습용 가상 데이터"; $("fileNow").append(b); }
+  const flagRows = flags.size, flagCells = [...flags.values()].reduce((a, b) => a + b.length, 0);
+  $("kpis").innerHTML = "";
+  [[S.rows.length, "측정 행"], [eqs.length, "설비"], [V.length, "변수 · " + V.map((c) => c.name).join(" · ")], [flagRows, `이상 후보 행 (값 ${flagCells}개)`]].forEach(([b, s], i) => {
+    const d = document.createElement("div"); d.className = "kpi" + (i === 3 && flagRows ? " alert" : ""); const bb = document.createElement("b"); bb.textContent = b; const sp = document.createElement("span"); sp.textContent = s; d.append(bb, sp); $("kpis").append(d);
+  });
+  const ch = $("charts"); ch.innerHTML = "";
+  eqs.forEach((e) => {
+    const blk = document.createElement("div"); blk.className = "eq-block";
+    const n = S.rows.filter((r) => r.eq === e).length, fl = S.rows.filter((r) => r.eq === e && flags.has(r.n)).length;
+    const nm = document.createElement("div"); nm.className = "eq-name"; nm.textContent = e; const sm = document.createElement("small"); sm.textContent = `${n}건 · 이상 후보 ${fl}행`; nm.append(sm); blk.append(nm);
+    const grid = document.createElement("div"); grid.className = "charts";
+    V.forEach((c, j) => {
+      const st = stats[e + "|" + j], box = document.createElement("div"); box.className = "chart";
+      const ct = document.createElement("div"); ct.className = "ct"; const a = document.createElement("span"); a.textContent = `${c.name}${c.unit ? " (" + c.unit + ")" : ""}`;
+      const b = document.createElement(st.cnt ? "em" : "span"); b.textContent = st.cnt ? `이상 후보 ${st.cnt}` : `평상 ${f2(st.lo)}~${f2(st.hi)}`; ct.append(a, b);
+      const cv = document.createElement("canvas"); cv.setAttribute("role", "img"); cv.setAttribute("aria-label", `${e} ${c.name} 추이, 평상 범위 ${f2(st.lo)}~${f2(st.hi)}, 이상 후보 ${st.cnt}개`);
+      box.append(ct, cv); grid.append(box); cv.dataset.e = e; cv.dataset.j = j;
+    });
+    blk.append(grid); ch.append(blk);
+  });
+  requestAnimationFrame(() => document.querySelectorAll("#charts canvas").forEach((cv) => drawChart(cv, cv.dataset.e, +cv.dataset.j)));
+
+  const stT = $("statTable"); stT.innerHTML = "";
+  const hr = stT.insertRow(); ["설비", "변수", "기준 건수", "평균", "표준편차", `평상 하한 (평균−${S.k}σ)`, `평상 상한 (평균+${S.k}σ)`, "최소", "최대", "이상 후보"].forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (i < 2) th.className = "l"; hr.append(th); });
+  eqs.forEach((e) => V.forEach((c, j) => {
+    const st = stats[e + "|" + j], tr = stT.insertRow();
+    [e, c.h, st.n, f2(st.m), f2(st.sd), f2(st.lo), f2(st.hi), f2(st.min), f2(st.max), st.cnt].forEach((v, i) => { const td = tr.insertCell(); td.textContent = v; td.className = i < 2 ? "l" : "num" + (i === 9 && st.cnt ? " hit" : ""); });
+  }));
+
+  const sel = $("eqSel"); sel.innerHTML = ""; [["__all", "모든 설비"], ...eqs.map((e) => [e, e])].forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.append(o); });
+  if (!["__all", ...eqs].includes(S.eq)) S.eq = "__all"; sel.value = S.eq;
+  document.querySelectorAll("#tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.f === S.filter)));
+  document.querySelectorAll("#kSeg button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.k === S.k)));
+  document.querySelectorAll("#baseSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.base === S.base)));
+  $("baseN").value = S.baseN; $("baseN").disabled = S.base !== "first";
+  renderTable(); save();
+}
+function verdict(r) { const f = S.res.flags.get(r.n); return f ? "이상 후보 (" + f.map((x) => S.cols.vars[x.j].name + " " + x.dir).join(", ") + ")" : "정상"; }
+function renderTable() {
+  const T = $("dataTable"), V = S.cols.vars; T.innerHTML = "";
+  const hr = T.insertRow(); ["시간", ...(S.res.eqs.length > 1 ? ["설비"] : []), ...V.map((c) => c.h), "판정"].forEach((h, i, a) => { const th = document.createElement("th"); th.textContent = h; if (i === 0 || h === "설비" || i === a.length - 1) th.className = "l"; hr.append(th); });
+  const rows = S.rows.filter((r) => (S.eq === "__all" || r.eq === S.eq) && (S.filter === "all" || S.res.flags.has(r.n)));
+  rows.forEach((r) => {
+    const tr = T.insertRow(), f = S.res.flags.get(r.n) || []; if (f.length) tr.className = "flag";
+    const c0 = tr.insertCell(); c0.textContent = r.t; c0.className = "l mono";
+    if (S.res.eqs.length > 1) { const c = tr.insertCell(); c.textContent = r.eq; c.className = "l"; }
+    V.forEach((c, j) => { const td = tr.insertCell(); td.textContent = r.v[j] === null ? "—" : r.v[j]; td.className = "num" + (f.some((x) => x.j === j) ? " hit" : ""); });
+    const v = tr.insertCell(); v.textContent = verdict(r); v.className = "verdict";
+  });
+  if (!rows.length) { const tr = T.insertRow(), td = tr.insertCell(); td.colSpan = 99; td.className = "l"; td.textContent = "조건에 맞는 행이 없습니다."; }
+}
+
+// ---------- 내려받기 ----------
+async function offer(filename, data, mime) {
+  if (window.claude && typeof window.claude.use === "function") {
+    const dl = await window.claude.use("downloads");
+    if (!dl) { msg("이 화면에서는 파일 저장을 쓸 수 없어요.", "err"); return; }
+    try { await dl.save({ filename, data }); msg(`${filename} 저장을 요청했어요.`, "ok"); }
+    catch (e) { msg(e && e.code === "declined" ? "저장을 취소했어요." : "저장하지 못했어요: " + (e && e.message || e), "err"); }
+    return;
+  }
+  const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data], { type: mime }));
+  const a = document.createElement("a"); a.href = url; a.download = filename; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+  msg(`${filename} 을(를) 내려받았어요.`, "ok");
+}
+const stem = () => S.name.replace(/\.[^.]+$/, "") || "sensor";
+function csvOut() {
+  const V = S.cols.vars, q = (s) => /[",\n]/.test(s) ? '"' + String(s).replace(/"/g, '""') + '"' : s;
+  const lines = [["시간", "설비", ...V.map((c) => c.h), "판정"].map(q).join(",")];
+  S.rows.forEach((r) => lines.push([r.t, r.eq, ...r.v.map((x) => (x === null ? "" : x)), verdict(r)].map((x) => q(String(x))).join(",")));
+  return "﻿" + lines.join("\r\n");
+}
+
+function buildDeck() {
+  const P = new PptxGenJS(); P.layout = "LAYOUT_WIDE"; P.title = "설비센서 이상 후보 분석";
+  const NAVY = "0E1F3E", ACC = "E8743B", INK = "16233D", MUT = "5B6880", RED = "D23B3B", GRN = "2E8B57", F = "Malgun Gothic";
+  const { eqs, stats, flags } = S.res, V = S.cols.vars, k = S.k;
+  const baseTxt = S.base === "first" ? `설비별 처음 ${S.baseN}건` : "전체 데이터";
+  const period = S.rows.length ? `${S.rows[0].t} ~ ${S.rows[S.rows.length - 1].t}` : "";
+  let page = 0;
+  const frame = (title, sub) => {
+    const s = P.addSlide(); page++;
+    s.background = { color: "F7F9FC" };
+    s.addShape(P.ShapeType.rect, { x: 0, y: 0, w: 13.333, h: 0.95, fill: { color: NAVY }, line: { color: NAVY } });
+    s.addShape(P.ShapeType.rect, { x: 0, y: 0, w: 0.12, h: 0.95, fill: { color: ACC }, line: { color: ACC } });
+    s.addText(title, { x: 0.45, y: 0.12, w: 9.6, h: 0.72, fontFace: F, fontSize: 26, bold: true, color: "FFFFFF", margin: 0 });
+    if (sub) s.addText(sub, { x: 8.6, y: 0.5, w: 4.45, h: 0.35, fontFace: F, fontSize: 11, color: "C9D3E3", align: "right", margin: 0 });
+    if (S.virtual) s.addText("실습용 가상 데이터", { x: 11.15, y: 0.1, w: 1.9, h: 0.34, fontFace: F, fontSize: 11, bold: true, color: "FFFFFF", fill: { color: RED }, align: "center", margin: 0 });
+    s.addShape(P.ShapeType.line, { x: 0.45, y: 7.05, w: 12.4, h: 0, line: { color: "DCE2EB", width: 1 } });
+    s.addText(`설비센서 이상 후보 분석 · ${S.name}`, { x: 0.45, y: 7.1, w: 9, h: 0.3, fontFace: F, fontSize: 10, color: MUT, margin: 0 });
+    s.addText(String(page), { x: 12.2, y: 7.1, w: 0.65, h: 0.3, fontFace: F, fontSize: 10, color: MUT, align: "right", margin: 0 });
+    return s;
+  };
+  const pal = { ink: "#16233D", muted: "#5B6880", rule: "#DCE2EB", band: "rgba(46,139,87,.16)", ok: "#2E8B57", bad: "#D23B3B", bg: "#FFFFFF" };
+  const chartImg = (e, j) => { const cv = document.createElement("canvas"); drawChart(cv, e, j, { w: 1240, h: 160, dpr: 2, fs: 13, pal, font: '"Malgun Gothic", "Apple SD Gothic Neo", sans-serif' }); return cv.toDataURL("image/png"); };
+
+  // 1. 표지
+  let s = frame("설비센서 이상 후보 분석", "평균 ± k·σ 평상 범위 기준");
+  s.addText("평상 범위를 벗어난 값을 '이상 후보'로 표시했습니다", { x: 0.6, y: 1.5, w: 12, h: 0.7, fontFace: F, fontSize: 28, bold: true, color: INK });
+  [["데이터", S.name], ["기간", period], ["규모", `${S.rows.length}행 · 설비 ${eqs.length}대 · 변수 ${V.length}개 (${V.map((c) => c.name).join(", ")})`],
+   ["기준", `평균 ± ${k} × 표준편차 · 기준 구간: ${baseTxt}`], ["결과", `이상 후보 ${flags.size}행 (값 ${[...flags.values()].reduce((a, b) => a + b.length, 0)}개)`]]
+    .forEach(([a, b], i) => { s.addText(a, { x: 0.6, y: 2.6 + i * 0.7, w: 1.6, h: 0.5, fontFace: F, fontSize: 16, bold: true, color: ACC }); s.addText(b, { x: 2.2, y: 2.6 + i * 0.7, w: 10.4, h: 0.5, fontFace: F, fontSize: 16, color: INK }); });
+
+  // 2. 요약
+  s = frame("요약 · 설비별 이상 후보", baseTxt);
+  const tiles = [[S.rows.length, "측정 행"], [eqs.length, "설비"], [V.length, "변수"], [flags.size, "이상 후보 행"]];
+  tiles.forEach(([v, l], i) => {
+    const x = 0.6 + i * 3.1, alert = i === 3 && v > 0;
+    s.addShape(P.ShapeType.roundRect, { x, y: 1.35, w: 2.85, h: 1.35, fill: { color: alert ? "FDECEC" : "FFFFFF" }, line: { color: alert ? RED : "DCE2EB" }, rectRadius: 0.08 });
+    s.addText(String(v), { x, y: 1.45, w: 2.85, h: 0.75, fontFace: F, fontSize: 34, bold: true, color: alert ? RED : INK, align: "center" });
+    s.addText(l, { x, y: 2.15, w: 2.85, h: 0.4, fontFace: F, fontSize: 13, color: MUT, align: "center" });
+  });
+  eqs.forEach((e, i) => {
+    const y = 3.1 + i * 0.62; if (y > 6.3) return;
+    const parts = V.map((c, j) => `${c.name} ${stats[e + "|" + j].cnt}`).join(" · ");
+    const fl = S.rows.filter((r) => r.eq === e && flags.has(r.n)).length;
+    s.addText(e, { x: 0.6, y, w: 4.6, h: 0.5, fontFace: F, fontSize: 15, bold: true, color: INK });
+    s.addText(`이상 후보 ${fl}행  (${parts})`, { x: 5.2, y, w: 7.6, h: 0.5, fontFace: F, fontSize: 15, color: fl ? RED : GRN, bold: !!fl });
+  });
+
+  // 3. 통계표
+  const head = ["설비", "변수", "평균", "표준편차", `하한(−${k}σ)`, `상한(+${k}σ)`, "이상 후보"].map((t) => ({ text: t, options: { bold: true, color: "FFFFFF", fill: { color: NAVY } } }));
+  const body = []; eqs.forEach((e) => V.forEach((c, j) => { const st = stats[e + "|" + j]; body.push([e, c.h, f2(st.m), f2(st.sd), f2(st.lo), f2(st.hi), { text: String(st.cnt), options: st.cnt ? { color: RED, bold: true } : {} }]); }));
+  for (let i = 0; i < body.length; i += 12) {
+    s = frame("설비별 평균 · 표준편차 · 평상 범위", `표본 표준편차 · 기준: ${baseTxt}`);
+    s.addTable([head, ...body.slice(i, i + 12)], { x: 0.6, y: 1.3, w: 12.1, colW: [3.4, 2.0, 1.3, 1.3, 1.4, 1.4, 1.3], fontFace: F, fontSize: 12, color: INK, border: { type: "solid", color: "DCE2EB", pt: 1 }, rowH: 0.36, valign: "middle" });
+  }
+
+  // 4. 설비별 차트 (변수 2개씩)
+  eqs.forEach((e) => {
+    for (let j0 = 0; j0 < V.length; j0 += 3) {
+      s = frame(`${e}`, "초록 띠 = 평상 범위 · 빨간 점 = 이상 후보");
+      [j0, j0 + 1, j0 + 2].filter((j) => j < V.length).forEach((j, n) => {
+        const st = stats[e + "|" + j], y = 1.15 + n * 1.95;
+        s.addText(`${V[j].h}   평상 ${f2(st.lo)} ~ ${f2(st.hi)}   이상 후보 ${st.cnt}개`, { x: 0.6, y, w: 12, h: 0.38, fontFace: F, fontSize: 14, bold: true, color: st.cnt ? RED : INK });
+        s.addImage({ data: chartImg(e, j), x: 0.6, y: y + 0.36, w: 12.1, h: 1.56 });
+      });
+    }
+  });
+
+  // 5. 이상 후보 목록
+  const fr = S.rows.filter((r) => flags.has(r.n));
+  const lh = ["시간", "설비", ...V.map((c) => c.h), "판정"].map((t) => ({ text: t, options: { bold: true, color: "FFFFFF", fill: { color: RED } } }));
+  if (!fr.length) { s = frame("이상 후보 목록", ""); s.addText("평상 범위를 벗어난 값이 없습니다.", { x: 0.6, y: 1.6, w: 12, h: 0.6, fontFace: F, fontSize: 20, color: GRN, bold: true }); }
+  for (let i = 0; i < fr.length; i += 12) {
+    s = frame(`이상 후보 목록 (${fr.length}행)`, `${i + 1}–${Math.min(fr.length, i + 12)}`);
+    const rows = fr.slice(i, i + 12).map((r) => { const f = flags.get(r.n); return [r.t, r.eq, ...V.map((c, j) => ({ text: r.v[j] === null ? "—" : String(r.v[j]), options: f.some((x) => x.j === j) ? { color: RED, bold: true, fill: { color: "FDECEC" } } : {} })), verdict(r)]; });
+    const vw = Math.max(1.0, Math.min(1.5, 5.4 / V.length));
+    s.addTable([lh, ...rows], { x: 0.6, y: 1.3, w: 12.1, colW: [2.0, 2.6, ...V.map(() => vw), 12.1 - 4.6 - vw * V.length], fontFace: F, fontSize: 11, color: INK, border: { type: "solid", color: "DCE2EB", pt: 1 }, rowH: 0.36, valign: "middle" });
+  }
+
+  // 6. 해석과 다음 단계
+  s = frame("해석과 다음 단계", "사람 검토 단계 포함");
+  const steps = ["이상 후보 탐지", "센서 오류 · 운영 맥락 확인", "담당자 검토 · 승인", "정비 조치 · 기록"];
+  steps.forEach((t, i) => {
+    const x = 0.6 + i * 3.1, hl = i === 2;
+    s.addShape(P.ShapeType.roundRect, { x, y: 1.5, w: 2.8, h: 1.0, fill: { color: hl ? "FDEDE4" : "FFFFFF" }, line: { color: hl ? ACC : "DCE2EB", width: hl ? 2 : 1 }, rectRadius: 0.1 });
+    s.addText(t, { x, y: 1.5, w: 2.8, h: 1.0, fontFace: F, fontSize: 15, bold: true, color: INK, align: "center", valign: "middle" });
+    if (i < 3) s.addText("→", { x: x + 2.8, y: 1.75, w: 0.3, h: 0.5, fontFace: F, fontSize: 18, color: MUT, align: "center" });
+  });
+  [`· 한 번만 튄 값은 재측정·센서 점검부터 합니다.`, `· 여러 번 연속으로 벗어나거나 계속 오르는 값은 추세로 보고 우선 검토합니다.`,
+   `· 기준 구간이 '${baseTxt}'이라 결과가 달라질 수 있습니다. 추세가 섞이면 표준편차가 커져 늦게 잡힙니다.`,
+   `· 탐지 결과로 설비를 자동 정지하지 않습니다. 담당자 승인 후 조치합니다.`]
+    .forEach((t, i) => s.addText(t, { x: 0.6, y: 3.0 + i * 0.75, w: 12.1, h: 0.6, fontFace: F, fontSize: 16, color: i === 3 ? ACC : INK, bold: i === 3 }));
+  return P;
+}
+
+// ---------- 이벤트 ----------
+function loadText(text, name) { try { ingest(text, name); render(); msg(`${name} 을(를) 불러왔어요.`, "ok"); } catch (e) { msg(e.message, "err"); } }
+async function readFile(f) { if (!f) return; if (!/\.csv$/i.test(f.name)) { msg("CSV 파일(.csv)만 올릴 수 있어요.", "err"); return; } loadText(decode(await f.arrayBuffer()), f.name); }
+$("file").addEventListener("change", (e) => { readFile(e.target.files[0]); e.target.value = ""; });
+const drop = $("drop");
+["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", (e) => readFile(e.dataTransfer.files[0]));
+$("kSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b && S.rows.length) { S.k = +b.dataset.k; render(); } });
+$("baseSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b && S.rows.length) { S.base = b.dataset.base; render(); } });
+$("baseN").addEventListener("change", (e) => { S.baseN = Math.max(3, Math.round(+e.target.value || 12)); render(); });
+$("tabs").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { S.filter = b.dataset.f; document.querySelectorAll("#tabs button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); renderTable(); save(); } });
+$("eqSel").addEventListener("change", (e) => { S.eq = e.target.value; renderTable(); save(); });
+$("sampleBtn").addEventListener("click", () => loadText(SAMPLE_CSV, SAMPLE_NAME));
+$("csvBtn").addEventListener("click", () => { if (S.rows.length) offer(`${stem()}_판정표.csv`, csvOut(), "text/csv"); });
+$("pptBtn").addEventListener("click", async () => {
+  if (!S.rows.length) return;
+  if (typeof PptxGenJS === "undefined") { msg("PPTX 도구를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.", "err"); return; }
+  const b = $("pptBtn"); b.disabled = true; msg("덱을 만드는 중…");
+  try { const blob = await buildDeck().write({ outputType: "blob" }); await offer(`${stem()}_이상후보_분석.pptx`, blob, "application/vnd.openxmlformats-officedocument.presentationml.presentation"); }
+  catch (e) { msg("덱을 만들지 못했어요: " + (e && e.message || e), "err"); }
+  finally { b.disabled = false; }
+});
+let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => S.res && document.querySelectorAll("#charts canvas").forEach((cv) => drawChart(cv, cv.dataset.e, +cv.dataset.j)), 150); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => S.res && render());
+
+const saved = load();
+if (saved && saved.text) { Object.assign(S, { k: saved.k || 2, base: saved.base || "all", baseN: saved.baseN || 12, filter: saved.filter || "all", eq: saved.eq || "__all" }); loadText(saved.text, saved.name || "업로드한 CSV"); }
+else loadText(SAMPLE_CSV, SAMPLE_NAME);
+if (document.fonts) document.fonts.ready.then(() => S.res && document.querySelectorAll("#charts canvas").forEach((cv) => drawChart(cv, cv.dataset.e, +cv.dataset.j)));
+window.__app = { S, buildDeck };
+</script>
+</body>
+</html>

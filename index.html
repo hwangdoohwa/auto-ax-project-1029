@@ -137,6 +137,18 @@ section[id], header[id] { scroll-margin-top: 84px; }
 .ep h3 { font-size: 1.08rem; line-height: 1.4; }
 .ep p { color: var(--muted); font-size: .92rem; }
 
+/* 작업물 */
+.app-card { display: grid; gap: 6px; padding: 18px 20px; border: 3px solid var(--line); background: var(--pop); color: #1B2A4A; text-decoration: none; box-shadow: 4px 4px 0 var(--line); transition: transform .12s, box-shadow .12s; }
+.app-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--line); }
+.app-card strong { font-size: 1.15rem; }
+.app-card span { font-size: .93rem; }
+.app-k { font-family: var(--mono); font-size: .75rem !important; letter-spacing: .1em; }
+.shots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.shots figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+.shots img { width: 100%; height: auto; display: block; border: 3px solid var(--soft); }
+.shots figcaption { font-size: .86rem; color: var(--muted); }
+.dl { font-size: .9rem; color: var(--muted); }
+.dl a { color: var(--ink); font-weight: 700; }
 .notes { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; color: var(--muted); font-size: .95rem; max-width: 62em; }
 footer { border-top: 3px solid var(--line); }
 footer .in { max-width: 1080px; margin: 0 auto; padding-block: 22px 28px; font-size: .85rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
@@ -145,7 +157,7 @@ footer .in { max-width: 1080px; margin: 0 auto; padding-block: 22px 28px; font-s
   .hero { grid-template-columns: minmax(0, 1fr); }
   .player { width: min(280px, 78%); }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .checks, .eps, .steps { grid-template-columns: minmax(0, 1fr); }
+  .checks, .eps, .steps, .shots { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   :root { --shadow: 4px; }
@@ -169,6 +181,7 @@ footer .in { max-width: 1080px; margin: 0 auto; padding-block: 22px 28px; font-s
       <a href="#files">자료 구성</a>
       <a href="#steps">복습 순서</a>
       <a href="#checks">확인 숫자</a>
+      <a href="#works">실습 작업물</a>
       <a href="#videos">영상</a>
       <a href="#scope">범위</a>
     </nav>
@@ -234,6 +247,22 @@ footer .in { max-width: 1080px; margin: 0 auto; padding-block: 22px 28px; font-s
       <div class="check"><span class="lbl">EV 탭 · 기아 필터</span><b>8,064대</b><small>3개 모델.</small></div>
       <div class="check assume"><span class="lbl">절감액 탭 · 가정</span><b>32,200,000원/년</b><small>월 2,300건 × 5분 × 70% × 시간당 20,000원. 실제 절감 실적이 아니라 가정에 따른 환산액입니다.</small></div>
     </div>
+  </section>
+
+  <section class="panel" id="works" aria-labelledby="works-h">
+    <div class="head"><p class="eyebrow">Day5 예지보전 실습 작업물</p><h2 id="works-h">직접 열어 보고 써 보기</h2></div>
+    <a class="app-card" href="sensor-app/" target="_blank" rel="noopener">
+      <span class="app-k">웹앱</span>
+      <strong>설비센서 이상 후보 탐지기 ↗</strong>
+      <span>센서 CSV를 올리면 설비별 평균·표준편차·평상 범위(평균 ± kσ)와 이상 후보를 계산하고, 결과를 PPTX 덱으로 내려받습니다. 예시로 설비센서 50건(가상)이 들어 있습니다.</span>
+    </a>
+    <div class="shots">
+      <figure><a href="day5/case5.png" target="_blank" rel="noopener"><img src="day5/case5.png" alt="예지보전 도입사례 5건 인포그래픽: 기업별 센서, 예측 대상, 보고된 효과" loading="lazy"></a><figcaption>인포그래픽 · 예지보전 도입사례 5건 (실데이터)</figcaption></figure>
+      <figure><a href="day5/sensor_story.png" target="_blank" rel="noopener"><img src="day5/sensor_story.png" alt="설비센서 50건 인포그래픽: 튄 값과 추세 비교" loading="lazy"></a><figcaption>인포그래픽 · 설비센서 50건 튄 값 vs 추세 (가상)</figcaption></figure>
+      <figure><a href="day5/sensor_timeseries.png" target="_blank" rel="noopener"><img src="day5/sensor_timeseries.png" alt="설비별 진동·온도·압력 시계열과 평상 범위" loading="lazy"></a><figcaption>분석 차트 · 평상 범위(평균 ± 2σ)와 이상 후보</figcaption></figure>
+      <figure><a href="day5/sensor_zscore.png" target="_blank" rel="noopener"><img src="day5/sensor_zscore.png" alt="설비별 z-점수 히트맵" loading="lazy"></a><figcaption>분석 차트 · z-점수 히트맵</figcaption></figure>
+    </div>
+    <p class="dl">표 파일: <a href="day5/sensor_flags.csv">50건 판정표 CSV</a> · <a href="day5/sensor_stats.csv">통계·평상 범위 CSV</a> · <a href="day5/infographic_notes.md">인포그래픽 검증 메모</a></p>
   </section>
 
   <section class="panel" id="videos" aria-labelledby="ep-h">
